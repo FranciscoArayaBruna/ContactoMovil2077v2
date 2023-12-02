@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "671499792582",
+    "project_id": "contactomovil2077",
+    "storage_bucket": "contactomovil2077.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671499792582:android:2bdf017e001e0a274a27c7",
+        "android_client_info": {
+          "package_name": "com.pancho.contactomovil2077"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD54P0PMGo4fRVmW0n8rscK_YIEjHbK4WQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
