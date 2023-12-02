@@ -41,7 +41,7 @@ public class EditarPerfil extends AppCompatActivity {
     private ImageView imgUsuario;
     private EditText nombreEditar, apellidoEditar, usuarioEditar;
     private TextView correoEditar;
-    private Button btnCambiarImagen, btnGuardar;
+    private Button btnCambiarImagen, btnGuardar, btnCerrarSesion;
     private Uri imageUri;
 
     private FirebaseAuth mAuth;
@@ -64,12 +64,20 @@ public class EditarPerfil extends AppCompatActivity {
         usuarioEditar = findViewById(R.id.usuarioEditar);
         btnCambiarImagen = findViewById(R.id.button);
         btnGuardar = findViewById(R.id.btnGuardar);
+        btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
 
+        btnCerrarSesion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cerrarSesion();
+            }
+        });
         btnCambiarImagen.setOnClickListener(view -> seleccionarImagen());
         btnGuardar.setOnClickListener(view -> guardarCambios());
 
         // Obtener datos del usuario actual
         obtenerDatosUsuario();
+
     }
 
     private void obtenerDatosUsuario() {
@@ -229,4 +237,11 @@ public class EditarPerfil extends AppCompatActivity {
             imgUsuario.setImageURI(imageUri);
         }
     }
+    private void cerrarSesion() {
+        FirebaseAuth.getInstance().signOut();
+        // Redirige a la pantalla de inicio de sesión
+        startActivity(new Intent(EditarPerfil.this, Usuario.class));
+        finishAffinity(); // Cierra la actividad actual para que el usuario no pueda volver atrás con el botón de retroceso
+    }
+
 }
