@@ -9,13 +9,13 @@
 
     <EditText
         android:id="@+id/txtBuscarUsuario"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_width="224dp"
+        android:layout_height="52dp"
         android:layout_marginTop="24dp"
         android:background="#DDCD94"
         android:ems="10"
-        android:inputType="text"
         android:hint="Buscar usuario"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.079"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
         android:layout_width="60dp"
         android:layout_height="48dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="124dp"
+        android:layout_marginEnd="92dp"
         android:backgroundTint="#EDCB55"
         android:contentDescription="@string/description_my_image_button"
         android:src="?android:attr/actionModeWebSearchDrawable"
@@ -53,34 +53,39 @@
         android:layout_width="60dp"
         android:layout_height="48dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="48dp"
+        android:layout_marginEnd="24dp"
         android:backgroundTint="#EDCB55"
         android:contentDescription="@string/description_my_image_button"
         android:src="@drawable/baseline_add_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
+    <Button
         android:id="@+id/btnPerfil"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_marginTop="536dp"
-        android:layout_marginEnd="36dp"
-        android:backgroundTint="#66DBE8"
-        android:contentDescription="@string/description_profile_image"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/txtPerfil"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:backgroundTint="#00B8D4"
         android:text="Perfil"
         android:textColor="#000000"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/btnPerfil"
-        app:layout_constraintStart_toStartOf="@+id/btnPerfil"
-        app:layout_constraintEnd_toEndOf="@+id/btnPerfil" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.86" />
+
+    <Button
+        android:id="@+id/btnChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="92dp"
+        android:backgroundTint="#00B8D4"
+        android:text="Chat"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,8 @@
 package com.pancho.contactomovil2077.Modelo;
 
-public class Contacto {
+import java.io.Serializable;
+
+public class Contacto implements Serializable {
     private String apellido;
     private String correo;
     private String nombre;

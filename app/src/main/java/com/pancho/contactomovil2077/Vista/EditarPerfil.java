@@ -180,6 +180,8 @@ public class EditarPerfil extends AppCompatActivity {
 
                                     if (committed && error == null) {
                                         Toast.makeText(EditarPerfil.this, "Cambios guardados exitosamente", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(EditarPerfil.this, MainActivity.class);
+                                        startActivity(intent);
                                     } else {
                                         Toast.makeText(EditarPerfil.this, "Error al guardar cambios", Toast.LENGTH_SHORT).show();
                                     }

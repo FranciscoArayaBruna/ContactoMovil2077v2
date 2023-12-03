@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ContactosAdapter extends RecyclerView.Adapter<ContactosAdapter.ContactoViewHolder> {
 
-    private static List<Contacto> listaDeContactos;
+    private List<Contacto> listaDeContactos;
     private OnContactoClickListener onContactoClickListener;
     private int posicionSeleccionada = RecyclerView.NO_POSITION;
 
@@ -34,7 +34,7 @@ public class ContactosAdapter extends RecyclerView.Adapter<ContactosAdapter.Cont
     @Override
     public void onBindViewHolder(@NonNull ContactoViewHolder holder, int position) {
         Contacto contacto = listaDeContactos.get(position);
-        holder.bind(contacto);
+        holder.bind(contacto, position);
     }
 
     @Override
@@ -47,24 +47,36 @@ public class ContactosAdapter extends RecyclerView.Adapter<ContactosAdapter.Cont
         notifyDataSetChanged();
     }
 
-    public int getPosicionSeleccionada() {
-        // Implementa la lógica para obtener la posición seleccionada
-        return posicionSeleccionada;
-    }
-    public Contacto getItem(int position) {
-        // Implementa la lógica para obtener el elemento en la posición especificada
-        return listaDeContactos.get(position);
-    }
-
-    public List<Contacto> getListaDeContactos() {
-        return listaDeContactos;
+    public void deseleccionarItem() {
+        if (posicionSeleccionada != RecyclerView.NO_POSITION) {
+            posicionSeleccionada = RecyclerView.NO_POSITION;
+            notifyDataSetChanged();
+        }
     }
 
     public interface OnContactoClickListener {
         void onContactoClick(Contacto contacto);
     }
+    public Contacto getItemSeleccionado() {
+        if (posicionSeleccionada != RecyclerView.NO_POSITION) {
+            return listaDeContactos.get(posicionSeleccionada);
+        }
+        return null;
+    }
 
-    static class ContactoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    // Método para obtener la lista de contactos
+    public List<Contacto> getListaDeContactos() {
+        return listaDeContactos;
+    }
+
+    // Método para actualizar la posición seleccionada
+    public void actualizarPosicionSeleccionada(int posicion) {
+        posicionSeleccionada = posicion;
+        notifyDataSetChanged();
+    }
+
+
+    class ContactoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView textNombre;
         private TextView textCorreo;
@@ -79,9 +91,13 @@ public class ContactosAdapter extends RecyclerView.Adapter<ContactosAdapter.Cont
             itemView.setOnClickListener(this);
         }
 
-        public void bind(Contacto contacto) {
-            textNombre.setText(contacto.getNombre());
-            textCorreo.setText(contacto.getCorreo());
+        public void bind(Contacto contacto, int position) {
+            if (contacto!=null){
+                textNombre.setText(contacto.getNombre());
+                textCorreo.setText(contacto.getCorreo());
+                itemView.setSelected(posicionSeleccionada == position);
+            }
+
         }
 
         @Override
@@ -90,10 +106,14 @@ public class ContactosAdapter extends RecyclerView.Adapter<ContactosAdapter.Cont
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
                     onContactoClickListener.onContactoClick(listaDeContactos.get(position));
+
+                    // Actualizar la posición seleccionada
+                    posicionSeleccionada = position;
+
+                    // Notificar al adaptador sobre el cambio en la selección
+                    notifyDataSetChanged();
                 }
             }
         }
-
     }
 }
-

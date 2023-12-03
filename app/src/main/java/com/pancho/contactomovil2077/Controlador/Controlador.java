@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pancho.contactomovil2077.Modelo.UsuarioModel;
 import com.pancho.contactomovil2077.Vista.ListaContactosActivity;
+import com.pancho.contactomovil2077.Vista.MainActivity;
 import com.pancho.contactomovil2077.Vista.Registro;
 
 public class Controlador {
@@ -79,7 +80,7 @@ public class Controlador {
     }
 
     private void abrirMainActivity(UsuarioModel usuario) {
-        Intent intent = new Intent(context, ListaContactosActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
         intent.putExtra("usuario", usuario);
         context.startActivity(intent);
         // Cerrar la actividad actual para evitar que el usuario regrese al inicio de sesión presionando el botón "Atrás"

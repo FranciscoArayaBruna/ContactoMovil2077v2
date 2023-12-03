@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,7 +28,7 @@ import com.pancho.contactomovil2077.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListaContactosActivity extends AppCompatActivity {
+public class ListaContactosActivity extends AppCompatActivity implements ContactosAdapter.OnContactoClickListener {
 
     private List<Contacto> listaDeContactos;
     private ContactosAdapter adapter;
@@ -46,27 +45,47 @@ public class ListaContactosActivity extends AppCompatActivity {
         cargarTodosLosUsuarios();
         configurarRecyclerView();
 
-
         ImageButton btnBuscar = findViewById(R.id.btnBuscar);
         btnBuscar.setOnClickListener(view -> buscarUsuario());
 
+        Button btnPerfil = findViewById(R.id.btnPerfil);
+        btnPerfil.setOnClickListener(v -> {
+            Intent i = new Intent(ListaContactosActivity.this, EditarPerfil.class);
+            startActivity(i);
+        });
+
         ImageButton btnAgregar = findViewById(R.id.btnAgregar);
-        btnAgregar.setOnClickListener(view -> agregarUsuarioDesdeBusqueda());
+        btnAgregar.setOnClickListener(v -> {
+            Contacto contactoSeleccionado = adapter.getItemSeleccionado();
+            if (contactoSeleccionado != null) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("nuevoContacto", contactoSeleccionado);
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            } else {
+                Toast.makeText(this, "Ningún contacto seleccionado", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        ImageButton btnPerfil = findViewById(R.id.btnPerfil);
-        btnPerfil.setOnClickListener(view -> irAActivityEditarPerfil());
+        Button btnChat = findViewById(R.id.btnChat);
+        btnChat.setOnClickListener(v -> {
+            Intent i = new Intent(ListaContactosActivity.this, MainActivity.class);
+            startActivity(i);
+        });
 
-        // Agregar el código para cargar la imagen de perfil y configurar el clic en el botón de perfil
-        configurarPerfil();
+        RecyclerView recyclerView = findViewById(R.id.rvLista);
+        recyclerView.setOnTouchListener((v, event) -> {
+            adapter.deseleccionarItem();
+            return false;
+        });
     }
 
     private void configurarRecyclerView() {
         RecyclerView recyclerView = findViewById(R.id.rvLista);
-        adapter = new ContactosAdapter(listaDeContactos, contacto -> abrirPerfilContacto(contacto));
+        adapter = new ContactosAdapter(listaDeContactos, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
-
 
     private void cargarTodosLosUsuarios() {
         DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference().child("Usuario");
@@ -101,25 +120,27 @@ public class ListaContactosActivity extends AppCompatActivity {
         });
     }
 
-
-
     private void buscarUsuario() {
         EditText txtBuscarUsuario = findViewById(R.id.txtBuscarUsuario);
-        String nombreApellidoBuscado = txtBuscarUsuario.getText().toString().trim().toLowerCase();
+        String nombreApellidoBuscado = txtBuscarUsuario.getText().toString().trim();
 
         DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference().child("Usuario");
 
-        // Dividir la entrada en nombre y apellido (si es proporcionado)
-        String[] partesNombreApellido = nombreApellidoBuscado.split("\\s+");
-        String nombreBuscado = partesNombreApellido[0];
-
         // Filtrar usuarios por nombre y opcionalmente por apellido
         Query query;
-        if (partesNombreApellido.length > 1) {
+        if (nombreApellidoBuscado.contains(" ")) {
+            // Si hay espacio, asumimos que se proporcionó un nombre y un apellido
+            String[] partesNombreApellido = nombreApellidoBuscado.split("\\s+");
+            String nombreBuscado = partesNombreApellido[0];
             String apellidoBuscado = partesNombreApellido[1];
-            query = usuarioRef.orderByChild("nombreApellido").startAt(nombreApellidoBuscado).endAt(nombreApellidoBuscado + "\uf8ff");
+
+            // Hacer la consulta insensible a mayúsculas y minúsculas para nombre y apellido
+            query = usuarioRef.orderByChild("nombre").startAt(nombreBuscado).endAt(nombreBuscado + "\uf8ff")
+                    .orderByChild("apellido").startAt(apellidoBuscado).endAt(apellidoBuscado + "\uf8ff");
         } else {
-            query = usuarioRef.orderByChild("nombre").startAt(nombreBuscado).endAt(nombreBuscado + "\uf8ff");
+            // Si no hay espacio, asumimos que solo se proporcionó un nombre
+            // Hacer la consulta insensible a mayúsculas y minúsculas para el nombre
+            query = usuarioRef.orderByChild("nombre").startAt(nombreApellidoBuscado).endAt(nombreApellidoBuscado + "\uf8ff");
         }
 
         query.addValueEventListener(new ValueEventListener() {
@@ -137,11 +158,17 @@ public class ListaContactosActivity extends AppCompatActivity {
                     // Obtener la lista completa de usuarios
                     List<Contacto> listaCompleta = adapter.getListaDeContactos();
 
-                    // Agregar los resultados de la búsqueda al principio de la lista
-                    listaCompleta.addAll(0, resultados);
+                    // Limpiar la lista antes de agregar los resultados de la búsqueda
+                    listaCompleta.clear();
+
+                    // Agregar los resultados de la búsqueda a la lista
+                    listaCompleta.addAll(resultados);
 
                     // Actualizar el RecyclerView con la lista combinada
                     adapter.actualizarLista(listaCompleta);
+
+                    // Vaciar el contenido del EditText
+                    txtBuscarUsuario.setText("");
                 }
             }
 
@@ -153,20 +180,18 @@ public class ListaContactosActivity extends AppCompatActivity {
         });
     }
 
-
-
     private void agregarUsuarioDesdeBusqueda() {
         // Obtener el contacto seleccionado en el RecyclerView
-        int posicionSeleccionada = adapter.getPosicionSeleccionada();
-        if (posicionSeleccionada != RecyclerView.NO_POSITION) {
-            Contacto nuevoContacto = adapter.getItem(posicionSeleccionada);
+        Contacto contactoSeleccionado = adapter.getItemSeleccionado();
 
+        if (contactoSeleccionado != null) {
             // Verificar si el usuario ya está en la lista
-            if (!listaDeContactos.contains(nuevoContacto)) {
-                // Agregar el nuevo contacto a la lista y actualizar el RecyclerView
-                agregarContacto(nuevoContacto);
-                txtBuscarUsuario.setText(""); // Limpiar el EditText después de agregar
-                Toast.makeText(this, "Usuario agregado correctamente", Toast.LENGTH_SHORT).show();
+            if (!listaDeContactos.contains(contactoSeleccionado)) {
+                // Establecer el resultado y finalizar la actividad
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("nuevoContacto", contactoSeleccionado);
+                setResult(RESULT_OK, resultIntent);
+                finish();
             } else {
                 Toast.makeText(this, "El usuario ya está en la lista", Toast.LENGTH_SHORT).show();
             }
@@ -175,11 +200,11 @@ public class ListaContactosActivity extends AppCompatActivity {
         }
     }
 
-
     private void agregarContacto(Contacto nuevoContacto) {
         listaDeContactos.add(nuevoContacto);
         adapter.actualizarLista(listaDeContactos);
     }
+
 
     private void irAActivityEditarPerfil() {
         Intent intent = new Intent(this, EditarPerfil.class);
@@ -222,55 +247,6 @@ public class ListaContactosActivity extends AppCompatActivity {
         // También puedes implementar aquí la opción de agregar nuevos contactos
     }
 
-    private void configurarPerfil() {
-        // Obtener la referencia al botón de perfil
-        ImageButton btnPerfil = findViewById(R.id.btnPerfil);
-
-        // Obtener el correo del usuario
-        String correoUsuario = obtenerCorreoUsuario(); // Reemplaza con la lógica real
-
-        // Obtener la referencia al usuario en la base de datos
-        DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference().child("Usuario");
-        usuarioRef.orderByChild("correo").equalTo(correoUsuario).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                        // Obtener la URL de la imagen de perfil desde la base de datos
-                        String urlImagenPerfil = userSnapshot.child("urlImagenPerfil").getValue(String.class);
-
-                        // Imprimir la URL en los logs para verificar
-                        Log.d("ListaContactosActivity", "URL de la imagen de perfil: " + urlImagenPerfil);
-
-                        if (urlImagenPerfil != null && !urlImagenPerfil.isEmpty()) {
-                            // Cargar la imagen de perfil si está disponible
-                            Glide.with(ListaContactosActivity.this).load(urlImagenPerfil).into(btnPerfil);
-                        } else {
-                            // Mostrar un icono predeterminado si no hay imagen de perfil
-                            btnPerfil.setImageResource(R.drawable.baseline_person_outline_24);
-                        }
-                    }
-                }
-            }
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Manejar errores, si es necesario
-                Toast.makeText(ListaContactosActivity.this, "Error al obtener datos del usuario", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Configurar el clic en el botón de perfil
-        btnPerfil.setOnClickListener(v -> {
-            // Aquí puedes abrir la actividad del perfil o realizar otras acciones según tus necesidades
-            // Por ejemplo, puedes abrir una actividad de perfil pasando el usuario actual como parámetro
-            Intent editarPerfilIntent = new Intent(ListaContactosActivity.this, EditarPerfil.class);
-            startActivity(editarPerfilIntent);
-        });
-    }
-
-
     // Función para obtener el correo del usuario (reemplaza con la lógica real)
     private String obtenerCorreoUsuario() {
         // Lógica para obtener el correo del usuario desde Firebase Auth
@@ -284,18 +260,14 @@ public class ListaContactosActivity extends AppCompatActivity {
         }
     }
 
-    private String obtenerUrlImagenPerfil(String correoUsuario) {
-        // Lógica para obtener la URL de la imagen de perfil desde Firebase Storage
-        // Reemplaza "tu_carpeta_en_storage" con la carpeta específica donde almacenas las imágenes de perfil
-        // y "nombre_de_la_imagen.jpg" con el nombre real de la imagen en Storage
-        String rutaImagen = "imagenes_perfil/" + correoUsuario + "/nombre_de_la_imagen.jpg";
+    @Override
+    public void onContactoClick(Contacto contacto) {
+        Log.d("ListaContactosActivity", "Contacto clickeado: " + contacto.getNombre());
 
-        // Recuerda que esto es un ejemplo y necesitas adaptarlo a tu implementación real en Firebase Storage
-        // Puedes utilizar métodos como FirebaseStorage.getInstance().getReference(rutaImagen).getDownloadUrl()
-        // para obtener la URL de la imagen desde Storage
+        // Obtener la posición del contacto clickeado
+        int position = listaDeContactos.indexOf(contacto);
 
-        // Devuelve la URL de la imagen o null si no hay imagen
-        return "url_de_la_imagen_de_perfil";
+        // Cambiar la posición seleccionada y notificar al adaptador
+        adapter.actualizarPosicionSeleccionada(position);
     }
-
 }
