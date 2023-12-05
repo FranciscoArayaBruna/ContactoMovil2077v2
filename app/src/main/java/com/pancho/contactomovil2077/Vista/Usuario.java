@@ -46,5 +46,11 @@ public class Usuario extends AppCompatActivity {
 
         // Llamar a la función de inicio de sesión del controlador
         loginController.iniciarSesion(correo, contrasena);
+
+        // Al iniciar sesión con éxito, inicia MainActivity y limpia la pila de actividades
+        Intent intent = new Intent(Usuario.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
+
 }

@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.pancho.contactomovil2077.Modelo.ChatManager;
 import com.pancho.contactomovil2077.Modelo.Contacto;
 import com.pancho.contactomovil2077.R;
 
@@ -34,12 +35,13 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
     private List<Contacto> listaDeContactos;
     private ContactosAdapter adapter;
     private EditText txtBuscarUsuario;
-
+    private ChatManager chatManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_contactos);
 
+        chatManager = ChatManager.getInstance(getApplicationContext()); // O pasa el contexto relevante
         txtBuscarUsuario = findViewById(R.id.txtBuscarUsuario);
 
         listaDeContactos = new ArrayList<>();
@@ -225,7 +227,8 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
 
         // Obtener la posición del contacto clickeado
         int position = listaDeContactos.indexOf(contacto);
-
+        String chatTopic = "chat/" + contacto.getCorreo(); // Un tema único por cada par de usuarios
+        chatManager.subscribeToChat(chatTopic);
         // Cambiar la posición seleccionada y notificar al adaptador
         adapter.actualizarPosicionSeleccionada(position);
         abrirPerfilContacto(contacto);
