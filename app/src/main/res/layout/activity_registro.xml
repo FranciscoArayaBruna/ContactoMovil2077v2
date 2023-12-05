@@ -102,7 +102,7 @@
         android:layout_width="150dp"
         android:layout_height="70dp"
         android:layout_marginTop="31dp"
-        android:backgroundTint="#7335A2D3"
+        android:backgroundTint="#00C853"
         android:text="Registrarse"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"

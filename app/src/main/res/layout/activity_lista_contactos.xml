@@ -21,18 +21,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvLista"
-        android:layout_width="387dp"
-        android:layout_height="620dp"
-        android:layout_marginTop="72dp"
-        android:background="#809BDCD4"
+        android:layout_width="319dp"
+        android:layout_height="524dp"
+        android:layout_marginTop="100dp"
         android:clipToPadding="false"
         android:padding="16dp"
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.666"
+        app:layout_constraintHorizontal_bias="0.173"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -40,23 +38,11 @@
         android:id="@+id/btnBuscar"
         android:layout_width="60dp"
         android:layout_height="48dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="92dp"
-        android:backgroundTint="#EDCB55"
-        android:contentDescription="@string/description_my_image_button"
-        android:src="?android:attr/actionModeWebSearchDrawable"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btnAgregar"
-        android:layout_width="60dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="24dp"
         android:backgroundTint="#EDCB55"
         android:contentDescription="@string/description_my_image_button"
-        android:src="@drawable/baseline_add_24"
+        android:src="?android:attr/actionModeWebSearchDrawable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -64,7 +50,7 @@
         android:id="@+id/btnPerfil"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="24dp"
         android:backgroundTint="#00B8D4"
         android:text="Perfil"
         android:textColor="#000000"
@@ -72,20 +58,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.86" />
+        app:layout_constraintVertical_bias="0.959" />
 
     <Button
         android:id="@+id/btnChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="92dp"
+        android:layout_marginBottom="28dp"
         android:backgroundTint="#00B8D4"
         android:text="Chat"
         android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintHorizontal_bias="0.572"
         app:layout_constraintStart_toStartOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

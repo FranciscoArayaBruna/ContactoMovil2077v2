@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -41,7 +42,7 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
 
         txtBuscarUsuario = findViewById(R.id.txtBuscarUsuario);
 
-        listaDeContactos = obtenerListaDeContactos();
+        listaDeContactos = new ArrayList<>();
         cargarTodosLosUsuarios();
         configurarRecyclerView();
 
@@ -52,19 +53,6 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
         btnPerfil.setOnClickListener(v -> {
             Intent i = new Intent(ListaContactosActivity.this, EditarPerfil.class);
             startActivity(i);
-        });
-
-        ImageButton btnAgregar = findViewById(R.id.btnAgregar);
-        btnAgregar.setOnClickListener(v -> {
-            Contacto contactoSeleccionado = adapter.getItemSeleccionado();
-            if (contactoSeleccionado != null) {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("nuevoContacto", contactoSeleccionado);
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            } else {
-                Toast.makeText(this, "Ningún contacto seleccionado", Toast.LENGTH_SHORT).show();
-            }
         });
 
         Button btnChat = findViewById(R.id.btnChat);
@@ -82,7 +70,7 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
 
     private void configurarRecyclerView() {
         RecyclerView recyclerView = findViewById(R.id.rvLista);
-        adapter = new ContactosAdapter(listaDeContactos, this);
+        adapter = new ContactosAdapter(listaDeContactos, this, true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
@@ -180,65 +168,74 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
         });
     }
 
-    private void agregarUsuarioDesdeBusqueda() {
+    private void agregarUsuarioDesdeBusqueda(Contacto contacto) {
         // Obtener el contacto seleccionado en el RecyclerView
-        Contacto contactoSeleccionado = adapter.getItemSeleccionado();
+        Contacto contactoSeleccionado = contacto;
 
         if (contactoSeleccionado != null) {
-            // Verificar si el usuario ya está en la lista
-            if (!listaDeContactos.contains(contactoSeleccionado)) {
-                // Establecer el resultado y finalizar la actividad
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("nuevoContacto", contactoSeleccionado);
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            } else {
-                Toast.makeText(this, "El usuario ya está en la lista", Toast.LENGTH_SHORT).show();
-            }
+            // Obtener la referencia a la ubicación de la lista de contactos en la base de datos
+            DatabaseReference listaContactosRef = FirebaseDatabase.getInstance().getReference().child("ListaDeContactos");
+
+            listaContactosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    List<Contacto> listaDeContactosFirebase = new ArrayList<>();
+
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot contactoSnapshot : dataSnapshot.getChildren()) {
+                            Contacto contactoFirebase = contactoSnapshot.getValue(Contacto.class);
+                            if (contactoFirebase != null) {
+                                listaDeContactosFirebase.add(contactoFirebase);
+                            }
+                        }
+                    }
+
+                    if (listaDeContactosFirebase.contains(contactoSeleccionado)) {
+                        // El contacto ya está en la lista, mostrar mensaje
+                        Toast.makeText(ListaContactosActivity.this, "El contacto ya está en la lista", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Agregar el nuevo contacto a la lista local
+                        listaDeContactos.add(contactoSeleccionado);
+
+                        // Agregar el nuevo contacto a la lista de Firebase
+                        listaDeContactosFirebase.add(contactoSeleccionado);
+
+                        // Actualizar la lista de contactos en Firebase
+                        listaContactosRef.setValue(listaDeContactosFirebase);
+
+                        // Notificar al usuario sobre el éxito
+                        Toast.makeText(ListaContactosActivity.this, "Contacto agregado", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Manejar errores, si es necesario
+                    Toast.makeText(ListaContactosActivity.this, "Error al agregar usuario", Toast.LENGTH_SHORT).show();
+                }
+            });
         } else {
-            Toast.makeText(this, "Seleccione un usuario de la lista", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ListaContactosActivity.this, "Seleccione un usuario de la lista", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void agregarContacto(Contacto nuevoContacto) {
-        listaDeContactos.add(nuevoContacto);
-        adapter.actualizarLista(listaDeContactos);
+    @Override
+    public void onContactoClick(Contacto contacto) {
+        Log.d("ListaContactosActivity", "Contacto clickeado: " + contacto.getNombre());
+
+        // Obtener la posición del contacto clickeado
+        int position = listaDeContactos.indexOf(contacto);
+
+        // Cambiar la posición seleccionada y notificar al adaptador
+        adapter.actualizarPosicionSeleccionada(position);
+        abrirPerfilContacto(contacto);
     }
 
-
-    private void irAActivityEditarPerfil() {
-        Intent intent = new Intent(this, EditarPerfil.class);
-        startActivity(intent);
-    }
-
-    private List<Contacto> obtenerListaDeContactos() {
-        List<Contacto> contactos = new ArrayList<>();
-
-        DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference().child("Usuario");
-
-        usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                        Contacto contacto = userSnapshot.getValue(Contacto.class);
-                        if (contacto != null) {
-                            contactos.add(contacto);
-                        }
-                    }
-                    // Notificar al adaptador que los datos han cambiado
-                    adapter.actualizarLista(contactos);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Manejar errores, si es necesario
-                Toast.makeText(ListaContactosActivity.this, "Error al cargar usuarios", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        return contactos;
+    @Override
+    public void onAgregarContactoClick(Contacto contacto) {
+        // Lógica para manejar el clic del botón "Agregar contacto"
+        // Esto se ejecutará cuando el botón se presiona en el adaptador
+        agregarUsuarioDesdeBusqueda(contacto);
     }
 
     private void abrirPerfilContacto(Contacto contacto) {
@@ -258,16 +255,5 @@ public class ListaContactosActivity extends AppCompatActivity implements Contact
             // Manejo de la situación en la que no hay usuario autenticado
             return null;
         }
-    }
-
-    @Override
-    public void onContactoClick(Contacto contacto) {
-        Log.d("ListaContactosActivity", "Contacto clickeado: " + contacto.getNombre());
-
-        // Obtener la posición del contacto clickeado
-        int position = listaDeContactos.indexOf(contacto);
-
-        // Cambiar la posición seleccionada y notificar al adaptador
-        adapter.actualizarPosicionSeleccionada(position);
     }
 }

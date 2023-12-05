@@ -23,10 +23,6 @@
         android:id="@+id/btnAgregarContacto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:backgroundTint="#EDCB55"
-        android:text="Agregar Contacto"
-        android:textColor="#000000" />
+        android:visibility="gone" />
 
 </LinearLayout>

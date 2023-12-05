@@ -51,12 +51,12 @@ public class Controlador {
                             obtenerDetallesUsuario(user.getEmail());
                         }
                     } else {
-                        Toast.makeText(context, "Error en el inicio de sesión: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Error en el inicio de sesión, contraseña incorrecta", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e("InicioSesion", "Error en el inicio de sesión: " + e.getMessage());
-                    Toast.makeText(context, "Error en el inicio de sesión. Consulta el LogCat para más detalles.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Error en el inicio de sesión.", Toast.LENGTH_SHORT).show();
                 });
     }
 

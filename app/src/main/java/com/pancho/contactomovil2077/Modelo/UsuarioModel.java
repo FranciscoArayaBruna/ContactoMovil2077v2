@@ -1,6 +1,7 @@
 package com.pancho.contactomovil2077.Modelo;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class UsuarioModel implements Serializable {
 
@@ -10,6 +11,8 @@ public class UsuarioModel implements Serializable {
     private String apellido;
     private String nombreUsuario;
     private String urlImagenPerfil;
+    private List<Contacto> listaDeContactos;
+
 
     public UsuarioModel() {
         // Constructor vacío requerido por Firebase
@@ -72,5 +75,12 @@ public class UsuarioModel implements Serializable {
 
     public void setUrlImagenPerfil(String urlImagenPerfil) {
         this.urlImagenPerfil = urlImagenPerfil;
+    }
+    public List<Contacto> getListaDeContactos() {
+        return listaDeContactos;
+    }
+
+    public void setListaDeContactos(List<Contacto> listaDeContactos) {
+        this.listaDeContactos = listaDeContactos;
     }
 }

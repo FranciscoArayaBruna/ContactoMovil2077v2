@@ -73,6 +73,7 @@
         android:layout_height="70dp"
         android:layout_marginTop="132dp"
         android:layout_marginEnd="52dp"
+        android:backgroundTint="#304FFE"
         android:text="Cambiar imagen"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -82,18 +83,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
+        android:backgroundTint="#00C853"
         android:text="Guardar cambios"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/usuarioEditar" />
+
     <Button
         android:id="@+id/btnCerrarSesion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#D50000"
         android:text="Cerrar Sesión"
-        app:layout_constraintTop_toBottomOf="@+id/btnGuardar"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGuardar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
