@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -43,6 +44,7 @@ public class EditarPerfil extends AppCompatActivity {
     private TextView correoEditar;
     private Button btnCambiarImagen, btnGuardar, btnCerrarSesion;
     private Uri imageUri;
+    private String imagenId;
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
@@ -113,19 +115,28 @@ public class EditarPerfil extends AppCompatActivity {
         }
     }
 
+    // ...
+
     private void cargarImagenPerfil(String userId) {
         // Obtener la referencia al storage
         StorageReference storageRef = storage.getReference().child("imagenes_perfil/" + userId + ".jpg");
 
         // Obtener la URL de la imagen
         storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-            // Cargar la imagen en el ImageView usando Glide
-            Glide.with(this).load(uri).into(imgUsuario);
+            // Invalidar la caché de Glide para cargar la nueva imagen
+            Glide.with(this)
+                    .load(uri)
+                    .skipMemoryCache(true)  // Invalidar la caché en memoria
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)  // Invalidar la caché en disco
+                    .into(imgUsuario);
         }).addOnFailureListener(e -> {
             // Manejar errores en caso de fallo al obtener la URL de la imagen
             Toast.makeText(this, "Error al obtener la URL de la imagen", Toast.LENGTH_SHORT).show();
         });
     }
+
+// ...
+
 
     private void seleccionarImagen() {
         Intent intent = new Intent(Intent.ACTION_PICK);
@@ -142,6 +153,9 @@ public class EditarPerfil extends AppCompatActivity {
             String nombreUsuario = usuarioEditar.getText().toString().trim();
 
             if (!TextUtils.isEmpty(nombre) && !TextUtils.isEmpty(apellido) && !TextUtils.isEmpty(nombreUsuario)) {
+                // Crear un nodo separado para almacenar las imágenes
+                DatabaseReference imagenesPerfilRef = mDatabase.child("ImagenesPerfil");
+
                 // Obtener la referencia a la ubicación del usuario actual en la base de datos
                 DatabaseReference usuarioRef = mDatabase.child("Usuario");
 
@@ -155,19 +169,34 @@ public class EditarPerfil extends AppCompatActivity {
                             // Mostrar en los logs los valores antes de la actualización
                             Log.d("EditarPerfil", "Valores antes de la actualización: " + userSnapshot.getValue());
 
+                            // Obtener los datos actuales del usuario
+                            UsuarioModel usuario = userSnapshot.getValue(UsuarioModel.class);
+
                             // Utilizar transacción para asegurar la atomicidad
                             userSnapshot.getRef().runTransaction(new Transaction.Handler() {
                                 @Override
                                 @NonNull
                                 public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                                    // Actualizar con nuevos datos sin borrar los existentes
-                                    currentData.child("nombre").setValue(nombre);
-                                    currentData.child("apellido").setValue(apellido);
-                                    currentData.child("nombreUsuario").setValue(nombreUsuario);
+                                    // Verificar si ya se actualizó la URL de la imagen
+                                    if (!currentData.hasChild("urlImagenPerfil")) {
+                                        // Actualizar con nuevos datos sin borrar los existentes
+                                        currentData.child("nombre").setValue(nombre);
+                                        currentData.child("apellido").setValue(apellido);
+                                        currentData.child("nombreUsuario").setValue(nombreUsuario);
 
-                                    // Subir la imagen si se seleccionó una nueva
-                                    if (imageUri != null) {
-                                        subirImagenPerfil(user.getUid());
+                                        // Subir la imagen si se seleccionó una nueva
+                                        if (imageUri != null) {
+                                            // Generar un ID único para la imagen si aún no existe
+                                            if (imagenId == null) {
+                                                imagenId = imagenesPerfilRef.push().getKey();
+                                            }
+
+                                            // Subir la imagen al nodo de ImagenesPerfil con el ID único
+                                            subirImagenPerfil(imagenId);
+
+                                            // Almacenar la URL de la imagen en el nodo del usuario
+                                            currentData.child("urlImagenPerfil").setValue("imagenes_perfil/" + imagenId + ".jpg");
+                                        }
                                     }
 
                                     return Transaction.success(currentData);
@@ -201,6 +230,7 @@ public class EditarPerfil extends AppCompatActivity {
             }
         }
     }
+
 
     private void subirImagenPerfil(String userId) {
         if (imageUri != null) {
