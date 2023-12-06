@@ -5,12 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/fondonuberara"
     tools:context=".Vista.ChatActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChatMensajes"
-        android:layout_width="294dp"
-        android:layout_height="595dp"
+        android:layout_width="322dp"
+        android:layout_height="620dp"
         app:layoutManager="LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/inputMensaje"
         app:layout_constraintEnd_toEndOf="parent"
@@ -19,20 +20,25 @@
 
     <EditText
         android:id="@+id/inputMensaje"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="252dp"
+        android:layout_height="54dp"
+        android:layout_marginBottom="28dp"
         android:hint="Escribe tu mensaje..."
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintHorizontal_bias="0.181"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnEnviar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="#389F63"
         android:text="Enviar"
         app:layout_constraintBottom_toBottomOf="@+id/inputMensaje"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/inputMensaje"/>
+        app:layout_constraintTop_toTopOf="@+id/inputMensaje"
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
